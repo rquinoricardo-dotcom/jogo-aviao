@@ -1,101 +1,73 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <title>Jogo do Avião</title>
     <style>
-	<script>
-        body {
-            background: radial-gradient(circle, #1a2a3a 0%, #000000 100%);
-            color: white;
-            font-family: 'Segoe UI', sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .box {
-            background: #151f28;
-            padding: 30px;
-            border-radius: 15px;
-            text-align: center;
-            border: 1px solid #2d4a5e;
-            margin: 20px;
-        }
-        #multiplicador { 
-            font-size: 48px; 
-            color: #00d4ff; 
-            font-weight: bold; 
-            margin: 20px 0;
-        }
-        input {
-            padding: 15px;
-            border-radius: 10px;
-            border: 2px solid #00d4ff;
-            background: #0b131a;
-            color: white;
-            width: 250px;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        button {
-            padding: 15px 40px;
-            border-radius: 10px;
-            background-color: #00d4ff;
-            border: none;
-            color: black;
-            font-weight: bold;
-            cursor: pointer;
-        }
+        .box { text-align: center; font-family: sans-serif; color: white; background: #222; padding: 20px; border-radius: 10px; }
+        #multiplicador { font-size: 40px; font-weight: bold; margin: 20px 0; }
+        #aviao { font-size: 50px; }
     </style>
 </head>
 <body>
 
-    <div class="box">
-        <h1>Bem-vindo ao Jogo do Avião!</h1>
-        <p>O multiplicador atual é:</p>
-        
-        <!-- Elemento para o multiplicador -->
-        <div id="multiplicador"><span id="aviao">🚀</span> x1.00</div>
-        
-        <!-- Input de aposta -->
-        <input type="number" id="valor-aposta" placeholder="Insira o valor (MZN)">
-        <br>
-        <!-- Botão de ação -->
-        <button id="btn-jogar">Jogar Novamente</button>
-    </div>
-	<script>
-		let saldo = 1000;
-const saldoDisplay = document.getElementById('saldo');
-const inputAposta = document.getElementById('valor-aposta');
-const btnJogar = document.getElementById('btn-jogar');
-const displayResultado = document.getElementById('resultado');
-
-btnJogar.addEventListener('click', () => {
-    let aposta = parseFloat(inputAposta.value);
-
-    if (aposta > saldo) {
-        alert("Saldo insuficiente!");
-        return;
-    }
-
-    // Subtrai a aposta do saldo
-    saldo -= aposta;
-    saldoDisplay.innerText = saldo;
-
-    // Simula a vitória (aqui o multiplicador subiria)
-    let multiplicadorAleatorio = (Math.random() * 2 + 1).toFixed(2); // Gera um valor entre 1 e 3
-    let ganho = aposta * multiplicadorAleatorio;
+<div class="box">
+    <h1>Bem-vindo ao Jogo do Avião!</h1>
+    <p>Seu Saldo: <span id="saldo">1000.00</span> MZN</p>
     
-    saldo += ganho;
-    saldoDisplay.innerText = saldo.toFixed(2);
-    displayResultado.innerText = "Você ganhou " + ganho.toFixed(2) + " MZN no multiplicador x" + multiplicadorAleatorio;
-});
-	    const btnJogar = document.getElementById('btn-jogar');
-    const displayMultiplicador = document.getElementById('multiplicador');
-    let multiplicador = 1.00;
-    let jogando = false;
+    <div id="multiplicador">
+        <span id="aviao">🚀</span> <span id="valor-mult">x1.00</span>
+    </div>
 
-   
+    <input type="number" id="valor-aposta" placeholder="Valor da aposta (MZN)">
+    <br><br>
+    <button id="btn-jogar">Apostar</button>
+</div>
+
+<script>
+    let saldo = 1000.00;
+    let jogando = false;
+    let aposta = 0;
+    let multiplicador = 1.00;
+
+    const saldoDisplay = document.getElementById('saldo');
+    const valorMultDisplay = document.getElementById('valor-mult');
+    const inputAposta = document.getElementById('valor-aposta');
+    const btnJogar = document.getElementById('btn-jogar');
+
+    btnJogar.addEventListener('click', () => {
+        if (jogando) return;
+
+        aposta = parseFloat(inputAposta.value);
+        if (isNaN(aposta) || aposta <= 0 || aposta > saldo) {
+            alert("Aposta inválida ou saldo insuficiente!");
+            return;
+        }
+
+        saldo -= aposta;
+        saldoDisplay.innerText = saldo.toFixed(2);
+        
+        jogando = true;
+        multiplicador = 1.00;
+        btnJogar.innerText = "Voando...";
+        
+        const intervalo = setInterval(() => {
+            multiplicador += 0.05;
+            valorMultDisplay.innerText = 'x' + multiplicador.toFixed(2);
+
+            if (multiplicador > (Math.random() * 10 + 1.5)) {
+                clearInterval(intervalo);
+                let ganho = aposta * multiplicador;
+                saldo += ganho;
+                saldoDisplay.innerText = saldo.toFixed(2);
+                alert("O avião caiu em " + multiplicador.toFixed(2) + "! Você ganhou " + ganho.toFixed(2) + " MZN");
+                
+                jogando = false;
+                btnJogar.innerText = "Apostar";
+            }
+        }, 100);
+    });
+</script>
+
+</body>
+</html>
