@@ -2,71 +2,81 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aviator Simulação</title>
+    <title>Aviator Completo</title>
     <style>
         body { background: #000; color: #fff; font-family: Arial; margin: 0; padding: 10px; }
-        .header { display: flex; justify-content: space-between; background: #222; padding: 10px; border-radius: 5px; }
-        .game-panel { background: #1a1a1a; padding: 20px; text-align: center; height: 200px; position: relative; margin-top: 10px; }
-        #login-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 10; padding: 20px; }
         .hidden { display: none; }
+        #login-screen { position: fixed; top:0; left:0; width:100%; height:100%; background:#000; z-index:100; text-align:center; padding-top:50px; }
+        .game-panel { background: #1a1a1a; padding: 20px; border-radius: 10px; text-align: center; position: relative; height: 150px; }
+        #aviao { font-size: 30px; position: absolute; bottom: 0; left: 0; transition: 0.1s; }
+        #multiplicador { font-size: 40px; color: #ffcc00; }
+        .player-row { display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding: 5px; font-size: 12px; }
     </style>
 </head>
 <body>
 
-<!-- Tela de Login -->
 <div id="login-screen">
-    <h2>Bem-vindo ao Aviator</h2>
+    <h2>Entrar no Jogo</h2>
     <input type="text" id="nome-usuario" placeholder="Seu nome">
     <button onclick="fazerLogin()">Entrar</button>
 </div>
 
-<!-- Jogo -->
-<div class="header">
-    <span id="display-nome">Jogador: ---</span>
-    <span id="display-saldo">Saldo: 1000.00 MZN</span>
-</div>
-
-<div class="game-panel">
-    <div id="multiplicador">x1.00</div>
-    <input type="number" id="valor-aposta" placeholder="MZN">
-    <button id="btn-apostar">Apostar</button>
-    <button id="btn-sacar" class="hidden">SAIR</button>
+<div id="game-ui">
+    <div style="display:flex; justify-content: space-between;">
+        <span id="display-nome"></span>
+        <span id="display-saldo"></span>
+    </div>
+    <div class="game-panel">
+        <div id="aviao">✈️</div>
+        <div id="multiplicador">x1.00</div>
+        <input type="number" id="valor-aposta" placeholder="MZN">
+        <button id="btn-apostar">Apostar</button>
+        <button id="btn-sacar" class="hidden">SAIR</button>
+    </div>
+    <div id="lista-jogadores" style="margin-top:10px;"></div>
 </div>
 
 <script>
-    let saldo = parseFloat(localStorage.getItem('saldo')) || 1000.00;
-    let nome = localStorage.getItem('usuario') || "";
+    let saldo = 1000.00;
+    let multiplicador = 1.00;
+    let jogando = false;
+    const jogadores = ["J_Silva", "Ana_Tech", "Carlos_Z"];
 
     function fazerLogin() {
-        nome = document.getElementById('nome-usuario').value;
+        const nome = document.getElementById('nome-usuario').value;
         if(nome) {
-            localStorage.setItem('usuario', nome);
-            localStorage.setItem('saldo', saldo);
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('display-nome').innerText = "Jogador: " + nome;
             document.getElementById('display-saldo').innerText = "Saldo: " + saldo.toFixed(2) + " MZN";
+            renderizarJogadores();
         }
     }
 
-    // Inicialização
-    if(nome) {
-        document.getElementById('login-screen').classList.add('hidden');
-        document.getElementById('display-nome').innerText = "Jogador: " + nome;
-        document.getElementById('display-saldo').innerText = "Saldo: " + saldo.toFixed(2) + " MZN";
+    function renderizarJogadores() {
+        document.getElementById('lista-jogadores').innerHTML = jogadores.map(n => `
+            <div class="player-row"><span>${n}</span><span id="status-${n}">Esperando</span></div>
+        `).join('');
     }
 
-    // Lógica básica de aposta para atualizar o saldo
     document.getElementById('btn-apostar').addEventListener('click', () => {
-        let aposta = parseFloat(document.getElementById('valor-aposta').value);
-        if(aposta > saldo) return alert("Saldo insuficiente!");
+        jogando = true;
+        document.getElementById('btn-apostar').classList.add('hidden');
+        document.getElementById('btn-sacar').classList.remove('hidden');
         
-        saldo -= aposta;
-        localStorage.setItem('saldo', saldo);
-        document.getElementById('display-saldo').innerText = "Saldo: " + saldo.toFixed(2) + " MZN";
-        
-        // Aqui você adiciona a lógica de multiplicar e devolver o saldo...
-        alert("Aposta registrada! Boa sorte.");
+        let intervalo = setInterval(() => {
+            multiplicador += 0.05;
+            document.getElementById('multiplicador').innerText = 'x' + multiplicador.toFixed(2);
+            document.getElementById('aviao').style.left = (multiplicador * 15) + "px";
+            
+            if(multiplicador > (Math.random() * 8 + 1.5)) {
+                clearInterval(intervalo);
+                jogando = false;
+                document.getElementById('btn-apostar').classList.remove('hidden');
+                document.getElementById('btn-sacar').classList.add('hidden');
+                document.getElementById('aviao').style.left = "0px";
+                alert("O avião caiu!");
+            }
+        }, 100);
     });
 </script>
 </body>
