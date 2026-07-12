@@ -3,104 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aviator Profissional</title>
+    <title>Aviator Simulação</title>
     <style>
-        body { background: #000; color: #fff; font-family: Arial, sans-serif; margin: 0; padding: 10px; }
-        .main-container { max-width: 500px; margin: auto; }
-        .game-panel { background: #1a1a1a; padding: 20px; border-radius: 10px; text-align: center; position: relative; height: 200px; overflow: hidden; }
-        #aviao { font-size: 40px; position: absolute; bottom: 10px; left: 10px; transition: all 0.1s linear; }
-        #multiplicador { font-size: 50px; font-weight: bold; color: #ffcc00; }
-        .players-panel { background: #111; padding: 10px; border-radius: 10px; margin-top: 10px; }
-        .player-row { display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding: 8px 0; font-size: 13px; }
+        body { background: #000; color: #fff; font-family: Arial; margin: 0; padding: 10px; }
+        .header { display: flex; justify-content: space-between; background: #222; padding: 10px; border-radius: 5px; }
+        .game-panel { background: #1a1a1a; padding: 20px; text-align: center; height: 200px; position: relative; margin-top: 10px; }
+        #login-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 10; padding: 20px; }
         .hidden { display: none; }
-        button { padding: 10px 20px; cursor: pointer; font-weight: bold; border-radius: 5px; border: none; }
     </style>
 </head>
 <body>
 
-<div class="main-container">
-    <div class="game-panel">
-        <div id="aviao">✈️</div>
-        <div id="multiplicador">x1.00</div>
-        <input type="number" id="valor-aposta" placeholder="MZN" style="width: 80px; padding: 8px;">
-        <button id="btn-apostar" style="background: #28a745; color: white;">Apostar</button>
-        <button id="btn-sacar" class="hidden" style="background: #ff4444; color: white;">SAIR</button>
-    </div>
+<!-- Tela de Login -->
+<div id="login-screen">
+    <h2>Bem-vindo ao Aviator</h2>
+    <input type="text" id="nome-usuario" placeholder="Seu nome">
+    <button onclick="fazerLogin()">Entrar</button>
+</div>
 
-    <div class="players-panel">
-        <div class="player-row" style="font-weight: bold;"><span>Jogador</span><span>Aposta</span><span>Status</span></div>
-        <div id="lista-jogadores"></div>
-    </div>
+<!-- Jogo -->
+<div class="header">
+    <span id="display-nome">Jogador: ---</span>
+    <span id="display-saldo">Saldo: 1000.00 MZN</span>
+</div>
+
+<div class="game-panel">
+    <div id="multiplicador">x1.00</div>
+    <input type="number" id="valor-aposta" placeholder="MZN">
+    <button id="btn-apostar">Apostar</button>
+    <button id="btn-sacar" class="hidden">SAIR</button>
 </div>
 
 <script>
-    let multiplicador = 1.00;
-    let jogando = false;
-    let apostaUsuario = 0;
-    let intervalo;
-    const listaJogadores = [
-        { nome: "J_Silva", aposta: 100 },
-        { nome: "Ana_Tech", aposta: 250 },
-        { nome: "Carlos_Z", aposta: 500 }
-    ];
+    let saldo = parseFloat(localStorage.getItem('saldo')) || 1000.00;
+    let nome = localStorage.getItem('usuario') || "";
 
-    const aviao = document.getElementById('aviao');
-    const multDisplay = document.getElementById('multiplicador');
-    const btnApostar = document.getElementById('btn-apostar');
-    const btnSacar = document.getElementById('btn-sacar');
-
-    function renderizarJogadores() {
-        document.getElementById('lista-jogadores').innerHTML = listaJogadores.map(j => `
-            <div class="player-row">
-                <span>${j.nome}</span><span>${j.aposta} MZN</span>
-                <span id="status-${j.nome}">Esperando</span>
-            </div>
-        `).join('');
+    function fazerLogin() {
+        nome = document.getElementById('nome-usuario').value;
+        if(nome) {
+            localStorage.setItem('usuario', nome);
+            localStorage.setItem('saldo', saldo);
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('display-nome').innerText = "Jogador: " + nome;
+            document.getElementById('display-saldo').innerText = "Saldo: " + saldo.toFixed(2) + " MZN";
+        }
     }
 
-    btnApostar.addEventListener('click', () => {
-        apostaUsuario = parseFloat(document.getElementById('valor-aposta').value);
-        if(!apostaUsuario) return alert("Digite um valor!");
-        
-        jogando = true;
-        multiplicador = 1.00;
-        btnApostar.classList.add('hidden');
-        btnSacar.classList.remove('hidden');
-        
-        intervalo = setInterval(() => {
-            multiplicador += 0.05;
-            multDisplay.innerText = 'x' + multiplicador.toFixed(2);
-            // Animação do avião subindo
-            aviao.style.left = (multiplicador * 20) + "px";
-            aviao.style.bottom = (multiplicador * 10) + "px";
+    // Inicialização
+    if(nome) {
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('display-nome').innerText = "Jogador: " + nome;
+        document.getElementById('display-saldo').innerText = "Saldo: " + saldo.toFixed(2) + " MZN";
+    }
 
-            listaJogadores.forEach(j => {
-                let el = document.getElementById('status-' + j.nome);
-                if (el.innerText === "Esperando" && Math.random() > 0.95) {
-                    let ganho = (j.aposta * multiplicador).toFixed(2);
-                    el.innerText = "Ganhou " + ganho + " MZN";
-                    el.style.color = "#28a745";
-                }
-            });
-
-            if (multiplicador > (Math.random() * 8 + 1.5)) finalizar(false);
-        }, 100);
+    // Lógica básica de aposta para atualizar o saldo
+    document.getElementById('btn-apostar').addEventListener('click', () => {
+        let aposta = parseFloat(document.getElementById('valor-aposta').value);
+        if(aposta > saldo) return alert("Saldo insuficiente!");
+        
+        saldo -= aposta;
+        localStorage.setItem('saldo', saldo);
+        document.getElementById('display-saldo').innerText = "Saldo: " + saldo.toFixed(2) + " MZN";
+        
+        // Aqui você adiciona a lógica de multiplicar e devolver o saldo...
+        alert("Aposta registrada! Boa sorte.");
     });
-
-    btnSacar.addEventListener('click', () => finalizar(true));
-
-    function finalizar(ganhou) {
-        clearInterval(intervalo);
-        jogando = false;
-        btnApostar.classList.remove('hidden');
-        btnSacar.classList.add('hidden');
-        aviao.style.left = "10px";
-        aviao.style.bottom = "10px";
-        if (ganhou) alert("Você sacou " + (apostaUsuario * multiplicador).toFixed(2) + " MZN!");
-        renderizarJogadores();
-    }
-
-    renderizarJogadores();
 </script>
 </body>
 </html>
