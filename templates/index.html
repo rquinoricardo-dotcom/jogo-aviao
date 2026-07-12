@@ -5,17 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aviator Clone</title>
     <style>
-        body { background: #000; color: #fff; font-family: Arial; margin: 0; padding: 10px; }
-        .main-container { display: flex; flex-direction: column; gap: 10px; }
-        /* Painel do Avião */
+        body { background: #000; color: #fff; font-family: Arial, sans-serif; margin: 0; padding: 10px; }
+        .main-container { display: flex; flex-direction: column; gap: 10px; max-width: 500px; margin: auto; }
         .game-panel { background: #222; padding: 20px; border-radius: 10px; text-align: center; }
-        #multiplicador { font-size: 50px; font-weight: bold; color: #ffcc00; }
-        /* Lista de Jogadores Estilo Aviator */
+        #multiplicador { font-size: 50px; font-weight: bold; color: #ffcc00; margin-bottom: 10px; }
         .players-panel { background: #111; padding: 10px; border-radius: 10px; }
-        .player-row { display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding: 5px 0; font-size: 14px; }
-        .voando { animation: spin 0.5s linear infinite; display: inline-block; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .player-row { display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding: 8px 0; font-size: 14px; }
         .hidden { display: none; }
+        button { padding: 10px 20px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -23,39 +20,70 @@
 <div class="main-container">
     <div class="game-panel">
         <div id="multiplicador"><span id="aviao">🚀</span> <span id="valor-mult">x1.00</span></div>
-        <input type="number" id="valor-aposta" placeholder="MZN" style="width: 80px;">
+        <input type="number" id="valor-aposta" placeholder="MZN" style="width: 80px; padding: 8px;">
         <button id="btn-apostar">Apostar</button>
-        <button id="btn-sacar" class="hidden">SAIR</button>
+        <button id="btn-sacar" class="hidden" style="background: #ff4444; color: white;">SAIR</button>
     </div>
 
     <div class="players-panel">
-        <div class="player-row"><span>Jogador</span><span>Aposta</span><span>Status</span></div>
-        <div id="lista-jogadores"></div>
+        <div class="player-row" style="font-weight: bold;"><span>Jogador</span><span>Aposta</span><span>Status</span></div>
+        <div id="lista-jogadores">
+            <div class="player-row"><span>J_Silva</span><span>100 MZN</span><span id="status-J_Silva">Esperando</span></div>
+            <div class="player-row"><span>Ana_Tech</span><span>250 MZN</span><span id="status-Ana_Tech">Esperando</span></div>
+            <div class="player-row"><span>Carlos_Z</span><span>500 MZN</span><span id="status-Carlos_Z">Esperando</span></div>
+        </div>
     </div>
 </div>
 
 <script>
-    const jogadores = [
-        { nome: "J_Silva", aposta: 100 },
-        { nome: "Ana_Tech", aposta: 250 },
-        { nome: "Carlos_Z", aposta: 500 }
-    ];
+    let multiplicador = 1.00;
+    let jogando = false;
+    let intervalo;
 
-    function renderizarJogadores() {
-        const lista = document.getElementById('lista-jogadores');
-        lista.innerHTML = jogadores.map(j => `
-            <div class="player-row">
-                <span>${j.nome}</span>
-                <span>${j.aposta} MZN</span>
-                <span id="status-${j.nome}">Esperando</span>
-            </div>
-        `).join('');
+    const valorMultDisplay = document.getElementById('valor-mult');
+    const btnApostar = document.getElementById('btn-apostar');
+    const btnSacar = document.getElementById('btn-sacar');
+    const jogadores = ["J_Silva", "Ana_Tech", "Carlos_Z"];
+
+    function atualizarStatusJogadores() {
+        jogadores.forEach(nome => {
+            let status = document.getElementById('status-' + nome);
+            if (jogando) {
+                if (Math.random() > 0.9) status.innerText = "Sacou x" + multiplicador.toFixed(2);
+                else if (status.innerText === "Esperando") status.innerText = "Apostou";
+            } else {
+                status.innerText = "Esperando";
+            }
+        });
     }
 
-    renderizarJogadores();
-    
-    // ... O restante da lógica de jogo (setInterval, btnApostar, etc) permanece igual
-    // Dica: Adicione a chamada renderizarJogadores() logo no início.
+    btnApostar.addEventListener('click', () => {
+        jogando = true;
+        multiplicador = 1.00;
+        btnApostar.classList.add('hidden');
+        btnSacar.classList.remove('hidden');
+
+        intervalo = setInterval(() => {
+            multiplicador += 0.05;
+            valorMultDisplay.innerText = 'x' + multiplicador.toFixed(2);
+            atualizarStatusJogadores();
+            
+            if (multiplicador > (Math.random() * 8 + 1.5)) {
+                encerrarJogo();
+            }
+        }, 100);
+    });
+
+    btnSacar.addEventListener('click', encerrarJogo);
+
+    function encerrarJogo() {
+        clearInterval(intervalo);
+        jogando = false;
+        btnApostar.classList.remove('hidden');
+        btnSacar.classList.add('hidden');
+        atualizarStatusJogadores();
+        alert("Fim de rodada! Multiplicador final: " + multiplicador.toFixed(2));
+    }
 </script>
 </body>
 </html>
