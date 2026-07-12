@@ -5,8 +5,18 @@
     <title>Jogo do Avião</title>
     <style>
         .box { text-align: center; font-family: sans-serif; color: white; background: #222; padding: 20px; border-radius: 10px; }
-        #multiplicador { font-size: 40px; font-weight: bold; margin: 20px 0; }
-        #aviao { font-size: 50px; }
+        #multiplicador { font-size: 40px; font-weight: bold; margin: 20px 0; position: relative; }
+        #aviao { font-size: 50px; display: inline-block; }
+        
+        /* Classe da animação */
+        .voando {
+            animation: voar 0.5s linear infinite;
+        }
+        @keyframes voar {
+            0% { transform: translate(0, 0); }
+            50% { transform: translate(10px, -10px); }
+            100% { transform: translate(0, 0); }
+        }
     </style>
 </head>
 <body>
@@ -27,18 +37,18 @@
 <script>
     let saldo = 1000.00;
     let jogando = false;
-    let aposta = 0;
     let multiplicador = 1.00;
 
     const saldoDisplay = document.getElementById('saldo');
     const valorMultDisplay = document.getElementById('valor-mult');
+    const aviao = document.getElementById('aviao');
     const inputAposta = document.getElementById('valor-aposta');
     const btnJogar = document.getElementById('btn-jogar');
 
     btnJogar.addEventListener('click', () => {
         if (jogando) return;
 
-        aposta = parseFloat(inputAposta.value);
+        let aposta = parseFloat(inputAposta.value);
         if (isNaN(aposta) || aposta <= 0 || aposta > saldo) {
             alert("Aposta inválida ou saldo insuficiente!");
             return;
@@ -50,6 +60,7 @@
         jogando = true;
         multiplicador = 1.00;
         btnJogar.innerText = "Voando...";
+        aviao.classList.add('voando'); // Inicia animação
         
         const intervalo = setInterval(() => {
             multiplicador += 0.05;
@@ -60,6 +71,8 @@
                 let ganho = aposta * multiplicador;
                 saldo += ganho;
                 saldoDisplay.innerText = saldo.toFixed(2);
+                
+                aviao.classList.remove('voando'); // Para animação
                 alert("O avião caiu em " + multiplicador.toFixed(2) + "! Você ganhou " + ganho.toFixed(2) + " MZN");
                 
                 jogando = false;
