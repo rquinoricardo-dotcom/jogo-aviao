@@ -58,7 +58,7 @@
         <p>O multiplicador atual é:</p>
         
         <!-- Elemento para o multiplicador -->
-        <div id="multiplicador"><span id="aviao">
+        <div id="multiplicador"><span id="aviao">🚀</span> x1.00</div>
         
         <!-- Input de aposta -->
         <input type="number" id="valor-aposta" placeholder="Insira o valor (MZN)">
@@ -67,32 +67,35 @@
         <button id="btn-jogar">Jogar Novamente</button>
     </div>
 	<script>
+		let saldo = 1000;
+const saldoDisplay = document.getElementById('saldo');
+const inputAposta = document.getElementById('valor-aposta');
+const btnJogar = document.getElementById('btn-jogar');
+const displayResultado = document.getElementById('resultado');
+
+btnJogar.addEventListener('click', () => {
+    let aposta = parseFloat(inputAposta.value);
+
+    if (aposta > saldo) {
+        alert("Saldo insuficiente!");
+        return;
+    }
+
+    // Subtrai a aposta do saldo
+    saldo -= aposta;
+    saldoDisplay.innerText = saldo;
+
+    // Simula a vitória (aqui o multiplicador subiria)
+    let multiplicadorAleatorio = (Math.random() * 2 + 1).toFixed(2); // Gera um valor entre 1 e 3
+    let ganho = aposta * multiplicadorAleatorio;
+    
+    saldo += ganho;
+    saldoDisplay.innerText = saldo.toFixed(2);
+    displayResultado.innerText = "Você ganhou " + ganho.toFixed(2) + " MZN no multiplicador x" + multiplicadorAleatorio;
+});
 	    const btnJogar = document.getElementById('btn-jogar');
     const displayMultiplicador = document.getElementById('multiplicador');
     let multiplicador = 1.00;
     let jogando = false;
 
-    btnJogar.addEventListener('click', () => {
-        if (jogando) return;
-        
-        jogando = true;
-        multiplicador = 1.00;
-        btnJogar.innerText = "Voando...";
-        
-        const intervalo = setInterval(() => {
-            multiplicador += 0.05;
-            displayMultiplicador.innerText = 'x' + multiplicador.toFixed(2);
-            
-            // Simula o avião voando para longe aleatoriamente
-            if (multiplicador > (Math.random() * 10 + 2)) {
-                clearInterval(intervalo);
-                jogando = false;
-                displayMultiplicador.innerText = "Caiu em x" + multiplicador.toFixed(2);
-                btnJogar.innerText = "Jogar Novamente";
-            }
-        }, 100);
-    });
-</script>
-
-</body>
-</html>
+   
