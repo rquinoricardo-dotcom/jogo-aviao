@@ -1,11 +1,10 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html>
 <head>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7828058261440114"
-     crossorigin="anonymous"></script>
     <meta charset="UTF-8">
     <title>Jogo do Avião</title>
     <style>
+	<script>
         body {
             background: radial-gradient(circle, #1a2a3a 0%, #000000 100%);
             color: white;
@@ -17,7 +16,6 @@
             height: 100vh;
             margin: 0;
         }
-        h1 { text-shadow: 0 0 10px #00d4ff; }
         .box {
             background: #151f28;
             padding: 30px;
@@ -26,7 +24,12 @@
             border: 1px solid #2d4a5e;
             margin: 20px;
         }
-        .multiplicador { font-size: 48px; color: #00d4ff; font-weight: bold; }
+        #multiplicador { 
+            font-size: 48px; 
+            color: #00d4ff; 
+            font-weight: bold; 
+            margin: 20px 0;
+        }
         input {
             padding: 15px;
             border-radius: 10px;
@@ -39,29 +42,57 @@
         }
         button {
             padding: 15px 40px;
-            border-radius: 25px;
+            border-radius: 10px;
+            background-color: #00d4ff;
             border: none;
-            background: linear-gradient(90deg, #00d4ff, #007bff);
-            color: white;
+            color: black;
             font-weight: bold;
             cursor: pointer;
-            font-size: 18px;
         }
-        button:hover { opacity: 0.9; }
     </style>
 </head>
 <body>
-    <h1>Bem-vindo ao Jogo do Avião!</h1>
-    <p>O multiplicador atual é:</p>
-    
-    <div class="box">
-        <div class="multiplicador">x{{ multiplicador }} ✈️</div>
-    </div>
 
-    <form method="POST">
-        <input type="number" name="aposta" placeholder="Insira o valor da aposta (MZN)" required>
+    <div class="box">
+        <h1>Bem-vindo ao Jogo do Avião!</h1>
+        <p>O multiplicador atual é:</p>
+        
+        <!-- Elemento para o multiplicador -->
+        <div id="multiplicador">x1.00</div>
+        
+        <!-- Input de aposta -->
+        <input type="number" id="valor-aposta" placeholder="Insira o valor (MZN)">
         <br>
-        <button type="submit">Jogar Novamente</button>
-    </form>
+        <!-- Botão de ação -->
+        <button id="btn-jogar">Jogar Novamente</button>
+    </div>
+	<script>
+	    const btnJogar = document.getElementById('btn-jogar');
+    const displayMultiplicador = document.getElementById('multiplicador');
+    let multiplicador = 1.00;
+    let jogando = false;
+
+    btnJogar.addEventListener('click', () => {
+        if (jogando) return;
+        
+        jogando = true;
+        multiplicador = 1.00;
+        btnJogar.innerText = "Voando...";
+        
+        const intervalo = setInterval(() => {
+            multiplicador += 0.05;
+            displayMultiplicador.innerText = 'x' + multiplicador.toFixed(2);
+            
+            // Simula o avião voando para longe aleatoriamente
+            if (multiplicador > (Math.random() * 10 + 2)) {
+                clearInterval(intervalo);
+                jogando = false;
+                displayMultiplicador.innerText = "Caiu em x" + multiplicador.toFixed(2);
+                btnJogar.innerText = "Jogar Novamente";
+            }
+        }, 100);
+    });
+</script>
+
 </body>
 </html>
