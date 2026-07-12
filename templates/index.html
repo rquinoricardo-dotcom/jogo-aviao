@@ -2,81 +2,67 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aviator Pro</title>
     <style>
-        body { background: #000; color: #fff; font-family: sans-serif; padding: 10px; }
-        .game-panel { background: #1a1a1a; padding: 20px; border-radius: 10px; text-align: center; height: 200px; position: relative; }
-        .controls { display: flex; gap: 10px; justify-content: center; margin-top: 10px; }
-        .aposta-box { background: #333; padding: 10px; border-radius: 5px; }
-        #multiplicador { font-size: 50px; color: #ffcc00; }
-        .hidden { display: none; }
+        body { background: #0e1215; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; }
+        .container { display: flex; flex-direction: column; height: 100vh; }
+        /* Painel Gráfico */
+        #grafico { background: linear-gradient(to bottom, #1a2228, #0e1215); height: 250px; position: relative; overflow: hidden; border-bottom: 2px solid #2f353a; }
+        #aviao { position: absolute; bottom: 20px; left: 20px; font-size: 30px; transition: 0.1s; }
+        #multiplicador { position: absolute; top: 50px; width: 100%; text-align: center; font-size: 50px; font-weight: bold; color: #ffcc00; }
+        /* Histórico de Rodadas */
+        #historico { display: flex; gap: 5px; padding: 10px; background: #1a2228; justify-content: center; }
+        .rodada-antiga { font-size: 12px; padding: 2px 8px; border-radius: 10px; background: #333; }
+        /* Painel de Apostas */
+        .apostas-painel { padding: 15px; }
+        .player-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #222; font-size: 13px; }
     </style>
 </head>
 <body>
 
-<div class="game-panel">
-    <div id="multiplicador">x1.00</div>
-</div>
+<div class="container">
+    <div id="historico">
+        <span class="rodada-antiga">x1.20</span>
+        <span class="rodada-antiga">x5.40</span>
+        <span class="rodada-antiga">x2.10</span>
+    </div>
+    
+    <div id="grafico">
+        <div id="multiplicador">x1.00</div>
+        <div id="aviao">✈️</div>
+    </div>
 
-<!-- Controles de Aposta -->
-<div class="controls">
-    <div class="aposta-box">
-        <input type="number" id="valor-1" value="10" style="width:60px;">
-        <input type="number" id="auto-saque-1" placeholder="Auto Saque" style="width:80px;">
-        <button id="btn-apostar-1">Apostar</button>
-        <button id="btn-sacar-1" class="hidden">SAIR</button>
+    <div class="apostas-painel">
+        <input type="number" id="valor" value="10" style="width: 50px;">
+        <button id="btn-apostar" style="background: #28a745; color: white; border: none; padding: 5px 15px;">APOSTAR</button>
+        <div id="lista-jogadores" style="margin-top: 10px;">
+            <div class="player-row"><span>J_Silva</span><span>100 MZN</span><span style="color:green">Esperando</span></div>
+            <div class="player-row"><span>Ana_Tech</span><span>250 MZN</span><span style="color:green">Esperando</span></div>
+        </div>
     </div>
 </div>
 
 <script>
     let mult = 1.00;
-    let jogando = false;
-    let autoSaqueAtivado = false;
+    let aviao = document.getElementById('aviao');
+    let multDisplay = document.getElementById('multiplicador');
 
-    // Lógica para o botão de aposta
-    document.getElementById('btn-apostar-1').addEventListener('click', () => {
-        jogando = true;
-        document.getElementById('btn-apostar-1').classList.add('hidden');
-        document.getElementById('btn-sacar-1').classList.remove('hidden');
-        
-        let metaAutoSaque = parseFloat(document.getElementById('auto-saque-1').value);
-
+    document.getElementById('btn-apostar').addEventListener('click', () => {
         let intervalo = setInterval(() => {
-            mult += 0.05;
-            document.getElementById('multiplicador').innerText = 'x' + mult.toFixed(2);
-
-            // Saque Automático
-            if (metaAutoSaque > 0 && mult >= metaAutoSaque) {
-                sacar(intervalo);
-                alert("Auto Saque realizado em x" + mult.toFixed(2));
-            }
-
-            // Queda aleatória
-            if (mult > (Math.random() * 8 + 1.2)) {
+            mult += 0.04;
+            multDisplay.innerText = 'x' + mult.toFixed(2);
+            aviao.style.left = (mult * 30) + "px";
+            aviao.style.bottom = (mult * 20) + "px";
+            
+            if(mult > (Math.random() * 5 + 1.2)) {
                 clearInterval(intervalo);
-                jogando = false;
-                resetarBotoes();
-                alert("O avião caiu!");
+                alert("O avião voou! Final: x" + mult.toFixed(2));
+                mult = 1.00;
+                aviao.style.left = "20px";
+                aviao.style.bottom = "20px";
             }
         }, 100);
-    });
-
-    function sacar(int) {
-        clearInterval(int);
-        jogando = false;
-        resetarBotoes();
-    }
-
-    function resetarBotoes() {
-        document.getElementById('btn-apostar-1').classList.remove('hidden');
-        document.getElementById('btn-sacar-1').classList.add('hidden');
-        mult = 1.00;
-        document.getElementById('multiplicador').innerText = 'x1.00';
-    }
-
-    document.getElementById('btn-sacar-1').addEventListener('click', () => {
-        sacar();
-        alert("Você sacou manualmente em x" + mult.toFixed(2));
     });
 </script>
 </body>
