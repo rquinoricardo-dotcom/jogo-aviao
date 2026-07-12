@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <title>Jogo do Avião</title>
     <style>
-        .box { text-align: center; font-family: sans-serif; color: white; background: #222; padding: 20px; border-radius: 10px; }
+        body { background: #1a1a1a; color: white; font-family: sans-serif; }
+        .box { display: flex; gap: 20px; padding: 20px; justify-content: center; }
+        .coluna-jogadores { width: 200px; background: #333; padding: 15px; border-radius: 10px; }
+        .coluna-jogo { flex-grow: 1; text-align: center; background: #222; padding: 20px; border-radius: 10px; }
         #multiplicador { font-size: 40px; font-weight: bold; margin: 20px 0; }
         #aviao { font-size: 50px; display: inline-block; }
         .voando { animation: voar 0.5s linear infinite; }
@@ -15,17 +18,26 @@
 <body>
 
 <div class="box">
-    <h1>Bem-vindo ao Jogo do Avião!</h1>
-    <p>Seu Saldo: <span id="saldo">1000.00</span> MZN</p>
-    
-    <div id="multiplicador">
-        <span id="aviao">🚀</span> <span id="valor-mult">x1.00</span>
+    <!-- Lista de Jogadores -->
+    <div class="coluna-jogadores">
+        <h3>Jogadores</h3>
+        <ul id="lista-jogadores" style="list-style: none; padding: 0;">
+            <li>J_Silva: <span id="status-1">Esperando</span></li>
+            <li>Ana_Tech: <span id="status-2">Esperando</span></li>
+            <li>Carlos_Z: <span id="status-3">Esperando</span></li>
+        </ul>
     </div>
 
-    <input type="number" id="valor-aposta" placeholder="Valor da aposta (MZN)">
-    <br><br>
-    <button id="btn-apostar">Apostar</button>
-    <button id="btn-sacar" class="hidden">Sacar Agora!</button>
+    <!-- Área do Jogo -->
+    <div class="coluna-jogo">
+        <h1>Jogo do Avião</h1>
+        <p>Seu Saldo: <span id="saldo">1000.00</span> MZN</p>
+        <div id="multiplicador"><span id="aviao">🚀</span> <span id="valor-mult">x1.00</span></div>
+        <input type="number" id="valor-aposta" placeholder="Valor (MZN)">
+        <br><br>
+        <button id="btn-apostar">Apostar</button>
+        <button id="btn-sacar" class="hidden">Sacar Agora!</button>
+    </div>
 </div>
 
 <script>
@@ -42,16 +54,28 @@
     const btnApostar = document.getElementById('btn-apostar');
     const btnSacar = document.getElementById('btn-sacar');
 
+    function simularJogadores() {
+        for (let i = 1; i <= 3; i++) {
+            let status = document.getElementById('status-' + i);
+            let sorteio = Math.random();
+            if (sorteio > 0.95 && jogando && status.innerText === "Esperando") {
+                status.innerText = "Apostou!";
+            } else if (sorteio < 0.1 && status.innerText === "Apostou!") {
+                status.innerText = "Sacou x" + multiplicador.toFixed(2);
+            } else if (!jogando) {
+                status.innerText = "Esperando";
+            }
+        }
+    }
+
     btnApostar.addEventListener('click', () => {
         aposta = parseFloat(inputAposta.value);
         if (isNaN(aposta) || aposta <= 0 || aposta > saldo) {
             alert("Aposta inválida ou saldo insuficiente!");
             return;
         }
-
         saldo -= aposta;
         saldoDisplay.innerText = saldo.toFixed(2);
-        
         jogando = true;
         multiplicador = 1.00;
         btnApostar.classList.add('hidden');
@@ -61,17 +85,12 @@
         intervalo = setInterval(() => {
             multiplicador += 0.05;
             valorMultDisplay.innerText = 'x' + multiplicador.toFixed(2);
-            
-            // Chance aleatória do avião cair
-            if (multiplicador > (Math.random() * 10 + 1.5)) {
-                encerrarJogo(false);
-            }
+            simularJogadores();
+            if (multiplicador > (Math.random() * 10 + 1.5)) encerrarJogo(false);
         }, 100);
     });
 
-    btnSacar.addEventListener('click', () => {
-        encerrarJogo(true);
-    });
+    btnSacar.addEventListener('click', () => encerrarJogo(true));
 
     function encerrarJogo(ganhou) {
         clearInterval(intervalo);
@@ -79,7 +98,6 @@
         btnApostar.classList.remove('hidden');
         btnSacar.classList.add('hidden');
         jogando = false;
-
         if (ganhou) {
             let ganho = aposta * multiplicador;
             saldo += ganho;
@@ -88,8 +106,8 @@
             alert("O avião caiu em x" + multiplicador.toFixed(2) + "!");
         }
         saldoDisplay.innerText = saldo.toFixed(2);
+        simularJogadores();
     }
 </script>
-
 </body>
 </html>
