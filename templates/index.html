@@ -2,81 +2,81 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Aviator Completo</title>
+    <title>Aviator Pro</title>
     <style>
-        body { background: #000; color: #fff; font-family: Arial; margin: 0; padding: 10px; }
+        body { background: #000; color: #fff; font-family: sans-serif; padding: 10px; }
+        .game-panel { background: #1a1a1a; padding: 20px; border-radius: 10px; text-align: center; height: 200px; position: relative; }
+        .controls { display: flex; gap: 10px; justify-content: center; margin-top: 10px; }
+        .aposta-box { background: #333; padding: 10px; border-radius: 5px; }
+        #multiplicador { font-size: 50px; color: #ffcc00; }
         .hidden { display: none; }
-        #login-screen { position: fixed; top:0; left:0; width:100%; height:100%; background:#000; z-index:100; text-align:center; padding-top:50px; }
-        .game-panel { background: #1a1a1a; padding: 20px; border-radius: 10px; text-align: center; position: relative; height: 150px; }
-        #aviao { font-size: 30px; position: absolute; bottom: 0; left: 0; transition: 0.1s; }
-        #multiplicador { font-size: 40px; color: #ffcc00; }
-        .player-row { display: flex; justify-content: space-between; border-bottom: 1px solid #333; padding: 5px; font-size: 12px; }
     </style>
 </head>
 <body>
 
-<div id="login-screen">
-    <h2>Entrar no Jogo</h2>
-    <input type="text" id="nome-usuario" placeholder="Seu nome">
-    <button onclick="fazerLogin()">Entrar</button>
+<div class="game-panel">
+    <div id="multiplicador">x1.00</div>
 </div>
 
-<div id="game-ui">
-    <div style="display:flex; justify-content: space-between;">
-        <span id="display-nome"></span>
-        <span id="display-saldo"></span>
+<!-- Controles de Aposta -->
+<div class="controls">
+    <div class="aposta-box">
+        <input type="number" id="valor-1" value="10" style="width:60px;">
+        <input type="number" id="auto-saque-1" placeholder="Auto Saque" style="width:80px;">
+        <button id="btn-apostar-1">Apostar</button>
+        <button id="btn-sacar-1" class="hidden">SAIR</button>
     </div>
-    <div class="game-panel">
-        <div id="aviao">✈️</div>
-        <div id="multiplicador">x1.00</div>
-        <input type="number" id="valor-aposta" placeholder="MZN">
-        <button id="btn-apostar">Apostar</button>
-        <button id="btn-sacar" class="hidden">SAIR</button>
-    </div>
-    <div id="lista-jogadores" style="margin-top:10px;"></div>
 </div>
 
 <script>
-    let saldo = 1000.00;
-    let multiplicador = 1.00;
+    let mult = 1.00;
     let jogando = false;
-    const jogadores = ["J_Silva", "Ana_Tech", "Carlos_Z"];
+    let autoSaqueAtivado = false;
 
-    function fazerLogin() {
-        const nome = document.getElementById('nome-usuario').value;
-        if(nome) {
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('display-nome').innerText = "Jogador: " + nome;
-            document.getElementById('display-saldo').innerText = "Saldo: " + saldo.toFixed(2) + " MZN";
-            renderizarJogadores();
-        }
-    }
-
-    function renderizarJogadores() {
-        document.getElementById('lista-jogadores').innerHTML = jogadores.map(n => `
-            <div class="player-row"><span>${n}</span><span id="status-${n}">Esperando</span></div>
-        `).join('');
-    }
-
-    document.getElementById('btn-apostar').addEventListener('click', () => {
+    // Lógica para o botão de aposta
+    document.getElementById('btn-apostar-1').addEventListener('click', () => {
         jogando = true;
-        document.getElementById('btn-apostar').classList.add('hidden');
-        document.getElementById('btn-sacar').classList.remove('hidden');
+        document.getElementById('btn-apostar-1').classList.add('hidden');
+        document.getElementById('btn-sacar-1').classList.remove('hidden');
         
+        let metaAutoSaque = parseFloat(document.getElementById('auto-saque-1').value);
+
         let intervalo = setInterval(() => {
-            multiplicador += 0.05;
-            document.getElementById('multiplicador').innerText = 'x' + multiplicador.toFixed(2);
-            document.getElementById('aviao').style.left = (multiplicador * 15) + "px";
-            
-            if(multiplicador > (Math.random() * 8 + 1.5)) {
+            mult += 0.05;
+            document.getElementById('multiplicador').innerText = 'x' + mult.toFixed(2);
+
+            // Saque Automático
+            if (metaAutoSaque > 0 && mult >= metaAutoSaque) {
+                sacar(intervalo);
+                alert("Auto Saque realizado em x" + mult.toFixed(2));
+            }
+
+            // Queda aleatória
+            if (mult > (Math.random() * 8 + 1.2)) {
                 clearInterval(intervalo);
                 jogando = false;
-                document.getElementById('btn-apostar').classList.remove('hidden');
-                document.getElementById('btn-sacar').classList.add('hidden');
-                document.getElementById('aviao').style.left = "0px";
+                resetarBotoes();
                 alert("O avião caiu!");
             }
         }, 100);
+    });
+
+    function sacar(int) {
+        clearInterval(int);
+        jogando = false;
+        resetarBotoes();
+    }
+
+    function resetarBotoes() {
+        document.getElementById('btn-apostar-1').classList.remove('hidden');
+        document.getElementById('btn-sacar-1').classList.add('hidden');
+        mult = 1.00;
+        document.getElementById('multiplicador').innerText = 'x1.00';
+    }
+
+    document.getElementById('btn-sacar-1').addEventListener('click', () => {
+        sacar();
+        alert("Você sacou manualmente em x" + mult.toFixed(2));
     });
 </script>
 </body>
