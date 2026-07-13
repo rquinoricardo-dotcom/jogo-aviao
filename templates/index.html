@@ -1,22 +1,23 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
+    <!-- Código do AdSense para validação -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7828058261440114" crossorigin="anonymous"></script>
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aviator Pro</title>
     <style>
         body { background: #0e1215; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; }
         .container { display: flex; flex-direction: column; height: 100vh; }
-        /* Painel Gráfico */
         #grafico { background: linear-gradient(to bottom, #1a2228, #0e1215); height: 250px; position: relative; overflow: hidden; border-bottom: 2px solid #2f353a; }
         #aviao { position: absolute; bottom: 20px; left: 20px; font-size: 30px; transition: 0.1s; }
         #multiplicador { position: absolute; top: 50px; width: 100%; text-align: center; font-size: 50px; font-weight: bold; color: #ffcc00; }
-        /* Histórico de Rodadas */
         #historico { display: flex; gap: 5px; padding: 10px; background: #1a2228; justify-content: center; }
         .rodada-antiga { font-size: 12px; padding: 2px 8px; border-radius: 10px; background: #333; }
-        /* Painel de Apostas */
         .apostas-painel { padding: 15px; }
         .player-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #222; font-size: 13px; }
+        .btn-apostar { background: #28a745; color: white; border: none; padding: 8px 20px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -34,9 +35,9 @@
     </div>
 
     <div class="apostas-painel">
-        <input type="number" id="valor" value="10" style="width: 50px;">
-        <button id="btn-apostar" style="background: #28a745; color: white; border: none; padding: 5px 15px;">APOSTAR</button>
-        <div id="lista-jogadores" style="margin-top: 10px;">
+        <input type="number" id="valor" value="10" style="width: 60px; padding: 5px;">
+        <button id="btn-apostar" class="btn-apostar">APOSTAR</button>
+        <div id="lista-jogadores" style="margin-top: 15px;">
             <div class="player-row"><span>J_Silva</span><span>100 MZN</span><span style="color:green">Esperando</span></div>
             <div class="player-row"><span>Ana_Tech</span><span>250 MZN</span><span style="color:green">Esperando</span></div>
         </div>
@@ -59,6 +60,7 @@
                 clearInterval(intervalo);
                 alert("O avião voou! Final: x" + mult.toFixed(2));
                 mult = 1.00;
+                multDisplay.innerText = 'x1.00';
                 aviao.style.left = "20px";
                 aviao.style.bottom = "20px";
             }
